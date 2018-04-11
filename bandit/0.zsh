@@ -1,0 +1,2 @@
+. ./otw
+play cat readme

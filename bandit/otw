@@ -1,0 +1,47 @@
+. ./bootstrap.level
+
+otw/cred () {
+    login=$game$1
+    read password < $[ $1 - 1 ].level
+}
+
+save () make $level.level
+up   () { save && level $(( ++level )) }
+play () sshpass -p$password ssh -p $port $login@$host $@
+
+if [[ -t 1 ]] {
+    if {which toilet &> /dev/null} {
+         banner () toilet --metal -f pagga "$@"
+    } else { banner () : }
+} else {
+}
+
+edit () {
+    local dest=$level.zsh
+    local script=$'. ./otw level %d\nplay '
+    test -f $dest ||
+        print -f $script $level > $dest
+    ${EDITOR:-vim} $dest
+}
+
+otw/level () {
+    level=$1
+    {
+    banner "_ Bandit: Level $level _"
+    print "commands:
+* play    : go play the level and search for the key
+* edit    : write the script to save the key
+* save    : save the key
+* level n : go to level n
+* key     : save the key
+* up      : level up
+instructions: http://overthewire.org/wargames/bandit/$game$[level+1].html
+" } >&2 }
+
+level () {
+    otw/level $1
+    otw/cred $level
+}
+
+if (( $+1 )) {"$@"} else {otw/level $level}
+
